@@ -1,11 +1,8 @@
+import numpy as np
 import random
 
-POPULATION_SIZE = 500
-MUTATION_RATE = 0.3
-GENERATIONS = 2000
-
-# Initial puzzle (0 represents empty cells)
-puzzle = [
+# Define the puzzle (0 represents empty cells)
+puzzle = np.array([
     [5, 3, 0, 0, 7, 0, 0, 0, 0],
     [6, 0, 0, 1, 9, 5, 0, 0, 0],
     [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -14,109 +11,150 @@ puzzle = [
     [7, 0, 0, 0, 2, 0, 0, 0, 6],
     [0, 6, 0, 0, 0, 0, 2, 8, 0],
     [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9],
-]
+    [0, 0, 0, 0, 8, 0, 0, 7, 9]
+])
 
-def get_fixed_cells(grid):
-    """Identify fixed cells in the Sudoku grid."""
-    return [[cell != 0 for cell in row] for row in grid]
+# Fitness Function: Higher scores for more unique rows, columns, and subgrids
+def fitness(individual):
+    score = 0
+    for i in range(9):
+        score += len(set(individual[i]))  # Row uniqueness
+        score += len(set(individual[:, i]))  # Column uniqueness
+    for row in range(0, 9, 3):
+        for col in range(0, 9, 3):
+            subgrid = individual[row:row+3, col:col+3].flatten()
+            score += len(set(subgrid))  # Subgrid uniqueness
+    # Penalize for duplicates
+    penalty = 243 - score  # Maximum fitness = 243
+    return score - penalty
 
-def create_individual(grid, fixed_cells):
-    """Generate a valid individual by filling empty cells."""
-    individual = [row[:] for row in grid]
+# Generate Initial Population
+def generate_population(puzzle, size=100):
+    population = []
+    for _ in range(size):
+        individual = puzzle.copy()
+        for row in range(9):
+            empty_indices = [i for i in range(9) if individual[row, i] == 0]
+            missing_values = list(set(range(1, 10)) - set(individual[row]))
+            random.shuffle(missing_values)
+            for idx, value in zip(empty_indices, missing_values):
+                individual[row, idx] = value
+        population.append(individual)
+    return population
+
+# Crossover: Combine two parents to create a child
+def crossover(parent1, parent2):
+    child = parent1.copy()
     for row in range(9):
-        available_nums = list(set(range(1, 10)) - set(individual[row]))
-        random.shuffle(available_nums)
-        for col in range(9):
-            if not fixed_cells[row][col]:  # Fill only mutable cells
-                individual[row][col] = available_nums.pop()
+        if random.random() > 0.5:
+            child[row] = parent2[row]
+    return child
+
+# Mutation: Swap two random cells in a row
+def mutate(individual, mutation_rate=0.1):
+    for row in range(9):
+        if random.random() < mutation_rate:
+            mutable_indices = [i for i in range(9) if puzzle[row, i] == 0]
+            if len(mutable_indices) > 1:
+                idx1, idx2 = random.sample(mutable_indices, 2)
+                individual[row, idx1], individual[row, idx2] = individual[row, idx2], individual[row, idx1]
     return individual
 
-def create_population(grid, size, fixed_cells):
-    """Create a population of Sudoku grids."""
-    return [create_individual(grid, fixed_cells) for _ in range(size)]
+def backtrack(grid):
+    def is_valid(grid, row, col, num):
+        if num in grid[row] or num in grid[:, col]:
+            return False
+        subgrid = grid[row//3*3:row//3*3+3, col//3*3:col//3*3+3]
+        return num not in subgrid.flatten()
 
-def fitness_function(grid):
-    """Compute the fitness of a Sudoku grid."""
-    fitness = 0
-    for row in grid:
-        fitness += 9 - len(set(row))
-    for col in range(9):
-        column = [grid[row][col] for row in range(9)]
-        fitness += 9 - len(set(column))
-    for block_row in range(3):
-        for block_col in range(3):
-            block = [
-                grid[r][c]
-                for r in range(block_row * 3, block_row * 3 + 3)
-                for c in range(block_col * 3, block_col * 3 + 3)
-            ]
-            fitness += 9 - len(set(block))
-    return fitness
-
-def is_valid_solution(grid):
-    """Check if a Sudoku grid is valid."""
-    return fitness_function(grid) == 0
-
-def crossover(parent1, parent2, fixed_cells):
-    """Perform crossover by combining rows from two parents."""
-    offspring = []
     for row in range(9):
-        offspring.append(parent1[row][:] if random.random() < 0.5 else parent2[row][:])
-    return offspring
+        for col in range(9):
+            if grid[row, col] == 0:
+                for num in range(1, 10):
+                    if is_valid(grid, row, col, num):
+                        grid[row, col] = num
+                        if backtrack(grid):
+                            return True
+                        grid[row, col] = 0
+                return False
+    return True
 
-def mutate(individual, fixed_cells):
-    """Mutate an individual by swapping non-fixed cells in a row."""
-    for _ in range(2):
-        row = random.randint(0, 8)
-        mutable_indices = [col for col in range(9) if not fixed_cells[row][col]]
-        if len(mutable_indices) > 1:
-            i, j = random.sample(mutable_indices, 2)
-            individual[row][i], individual[row][j] = individual[row][j], individual[row][i]
+def roulette_selection(population, fitness_scores):
+    total_fitness = sum(fitness_scores)
+    selection_probs = [f / total_fitness for f in fitness_scores]
+    selected_index = np.random.choice(len(population), p=selection_probs)
+    return population[selected_index]
 
-def genetic_algorithm(grid, generations, population_size, mutation_rate):
-    """Solve Sudoku using a genetic algorithm."""
-    fixed_cells = get_fixed_cells(grid)
-    population = create_population(grid, population_size, fixed_cells)
+def tournament_selection(population, fitness_scores, k=5):
+    tournament_indices = random.sample(range(len(population)), k)
+    tournament_individuals = [population[i] for i in tournament_indices]
+    tournament_fitness = [fitness_scores[i] for i in tournament_indices]
+    winner_index = tournament_fitness.index(max(tournament_fitness))
+    return tournament_individuals[winner_index]
 
+# Genetic Algorithm
+def genetic_algorithm(puzzle, generations=1750, population_size=170, mutation_rate=0.175, elite_fraction=0.175, selection_type="roulette"):
+    population = generate_population(puzzle, population_size)
+    
     for generation in range(generations):
-        population.sort(key=fitness_function)
-        best_fitness = fitness_function(population[0])
+        fitness_scores = [fitness(ind) for ind in population]
 
-        if best_fitness == 0:
-            return population[0], generation
+        # Check for a perfect solution
+        if max(fitness_scores) == 243:
+            print(f"Solution found in generation {generation}")
+            return population[fitness_scores.index(max(fitness_scores))]
 
-        selected = population[: population_size // 2]
-        new_population = []
-        while len(new_population) < population_size:
-            parent1, parent2 = random.sample(selected, 2)
-            offspring = crossover(parent1, parent2, fixed_cells)
-            if random.random() < mutation_rate:
-                mutate(offspring, fixed_cells)
-            new_population.append(offspring)
+        # Elite selection
+        elite_count = int(elite_fraction * population_size)
+        elites = [population[i] for i in np.argsort(fitness_scores)[-elite_count:]]
+
+        # Parent selection
+        if selection_type == "roulette":
+            parents = [roulette_selection(population, fitness_scores) for _ in range(population_size - elite_count)]
+        elif selection_type == "tournament":
+            parents = [tournament_selection(population, fitness_scores, k=5) for _ in range(population_size - elite_count)]
+        else:
+            raise ValueError("Invalid selection type. Choose 'roulette' or 'tournament'.")
+
+        # Generate new population with crossover and mutation
+        new_population = elites + [
+            mutate(crossover(random.choice(parents), random.choice(parents)), mutation_rate)
+            for _ in range(population_size - elite_count)
+        ]
         population = new_population
 
-    return population[0], generations
+        # Print progress
+        if generation % 100 == 0:
+            print(f"Generation {generation}: Best fitness = {max(fitness_scores)}")
 
-def print_grid(grid):
-    """Print a Sudoku grid."""
-    for row in grid:
-        print(row)
+    print("No solution found.")
+    return max(population, key=fitness)
 
-def main():
-    print("Initial Puzzle:")
-    print_grid(puzzle)
+# Validate the Sudoku grid
+def is_valid_solution(grid):
+    for i in range(9):
+        if len(set(grid[i])) != 9 or len(set(grid[:, i])) != 9:
+            return False
+    for row in range(0, 9, 3):
+        for col in range(0, 9, 3):
+            subgrid = grid[row:row+3, col:col+3].flatten()
+            if len(set(subgrid)) != 9:
+                return False
+    return True
 
-    solution, generations = genetic_algorithm(
-        puzzle, GENERATIONS, POPULATION_SIZE, MUTATION_RATE
-    )
+# Run the solver
+print("Running genetic algorithm...")
+solution = genetic_algorithm(puzzle)
 
-    if is_valid_solution(solution):
-        print(f"\nSolved Sudoku in {generations} generations:")
-        print_grid(solution)
+print("Best candidate solution:")
+print(solution)
+
+if is_valid_solution(solution):
+    print("Valid solution found!")
+else:
+    print("Refining with backtracking...")
+    if backtrack(solution):
+        print("Final solution:")
+        print(solution)
     else:
-        print(f"\nBest Attempt after {generations} generations:")
-        print_grid(solution)
-
-if __name__ == "__main__":
-    main()
+        print("Backtracking failed.")

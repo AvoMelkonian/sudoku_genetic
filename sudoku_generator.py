@@ -110,10 +110,10 @@ class SudokuOptimized9x9:
 def generate_sudoku():
     sudoku = SudokuOptimized9x9()
     sudoku.create_puzzle()
-    print("\nGenerated 9x9 Sudoku Puzzle:")
-    print("=" * (9 * 2 + 4))
+    #print("\nGenerated 9x9 Sudoku Puzzle:")
+    #print("=" * (9 * 2 + 4))
     sudoku.print_grid()
-    print("=" * (9 * 2 + 4))
+    #print("=" * (9 * 2 + 4))
 
 # Generate a puzzle
 if __name__ == "__main__":
