@@ -93,8 +93,3 @@ def generate_sudoku(difficulty="medium"):
     full_grid = create_full_sudoku()
     create_puzzle(full_grid, difficulty)
     return full_grid
-
-# Example usage
-if __name__ == "__main__":
-    puzzle = generate_sudoku(difficulty="easy")
-    print(puzzle)  # Only for testing purposes

@@ -1,3 +1,4 @@
+import sudoku_generator as sg
 import numpy as np
 import random
 
@@ -143,6 +144,10 @@ def is_valid_solution(grid):
     return True
 
 # Run the solver
+print("Generating Sudoku puzzle...")
+puzzle = sg.generate_sudoku(difficulty="easy")
+print("Puzzle Generated:")
+print(puzzle)
 print("Running genetic algorithm...")
 solution = genetic_algorithm(puzzle)
 
