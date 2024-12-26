@@ -147,7 +147,7 @@ def is_valid_solution(grid):
 print("Generating Sudoku puzzle...")
 puzzle = sg.generate_sudoku(difficulty="easy")
 print("Puzzle Generated:")
-#print(puzzle)
+print(puzzle)
 print("Running genetic algorithm...")
 solution = genetic_algorithm(puzzle)
 
