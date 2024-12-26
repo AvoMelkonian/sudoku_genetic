@@ -9,12 +9,14 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
 ## Setup Instructions
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/AvoMelkonian/sudoku_genetic.git
    cd sudoku_genetic
    ```
 
 2. Create and activate the virtual environment:
+
    ```bash
    python -m venv venv
    # Activate venv:
@@ -25,18 +27,10 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
    ```
 
 3. Install dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
-
-## How It Works
-
-1. **Sudoku Generator (`sudoku_generator.py`):**
-   - Generates a random Sudoku puzzle of varying difficulty levels.
-
-2. **Sudoku Solver (`ga_sudoku.py`):**
-   - Uses a Genetic Algorithm to evolve solutions for a given puzzle.
-   - Demonstrates the efficiency of GA in constraint satisfaction problems.
 
 ## Contributing
 
@@ -50,4 +44,3 @@ This project is licensed under MIT License:
 
 - Make sure your Python environment is set up correctly before running the scripts.
 - If you encounter issues, check your IDE configuration or refer to the `requirements.txt`.
-
