@@ -1,0 +1,18 @@
+# Byte-compiled files
+*.pyc
+__pycache__/
+
+# Virtual environments
+venv/
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
