@@ -93,7 +93,7 @@ def tournament_selection(population, fitness_scores, k=5):
     return tournament_individuals[winner_index]
 
 # Genetic Algorithm
-def genetic_algorithm(puzzle, generations=1750, population_size=170, mutation_rate=0.175, elite_fraction=0.175, selection_type="roulette"):
+def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_rate=0.25, elite_fraction=0.25, selection_type="roulette"):
     population = generate_population(puzzle, population_size)
     
     for generation in range(generations):
