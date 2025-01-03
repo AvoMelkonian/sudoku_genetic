@@ -30,6 +30,7 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
 
    ```bash
    pip install -r requirements.txt
+   pip install numpy
    ```
 
 ## Contributing
