@@ -5,6 +5,8 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
 ## Requirements
 
 - **Python 3.10+** (or compatible version)
+- **Node.js 18+**
+- **npm or yarn**
 
 ## Setup Instructions
 
@@ -31,6 +33,8 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
    ```bash
    pip install -r requirements.txt
    pip install numpy
+   pip install flask-cors
+   npm install next@latest react@latest react-dom@latest
    ```
 
 ## Contributing
