@@ -37,6 +37,13 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
    npm install next@latest react@latest react-dom@latest
    ```
 
+4. Run Back-end:
+
+   ```bash
+   py .\src\app.py
+   npm run dev
+   ```
+
 ## Contributing
 
 Feel free to submit issues or feature requests. Contributions are welcome through pull requests.
