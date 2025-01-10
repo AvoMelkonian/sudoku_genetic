@@ -93,44 +93,6 @@ def tournament_selection(population, fitness_scores, k=5):
     winner_index = tournament_fitness.index(max(tournament_fitness))
     return tournament_individuals[winner_index]
 
-# Genetic Algorithm
-def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_rate=0.25, elite_fraction=0.25, selection_type="roulette"):
-    population = generate_population(puzzle, population_size)
-    
-    for generation in range(generations):
-        fitness_scores = [fitness(ind) for ind in population]
-
-        # Check for a perfect solution
-        if max(fitness_scores) == 243:
-            print(f"Solution found in generation {generation}")
-            return population[fitness_scores.index(max(fitness_scores))]
-
-        # Elite selection
-        elite_count = int(elite_fraction * population_size)
-        elites = [population[i] for i in np.argsort(fitness_scores)[-elite_count:]]
-
-        # Parent selection
-        if selection_type == "roulette":
-            parents = [roulette_selection(population, fitness_scores) for _ in range(population_size - elite_count)]
-        elif selection_type == "tournament":
-            parents = [tournament_selection(population, fitness_scores, k=5) for _ in range(population_size - elite_count)]
-        else:
-            raise ValueError("Invalid selection type. Choose 'roulette' or 'tournament'.")
-
-        # Generate new population with crossover and mutation
-        new_population = elites + [
-            mutate(crossover(random.choice(parents), random.choice(parents)), mutation_rate)
-            for _ in range(population_size - elite_count)
-        ]
-        population = new_population
-
-        # Print progress
-        if generation % 100 == 0:
-            print(f"Generation {generation}: Best fitness = {max(fitness_scores)}")
-
-    print("No solution found.")
-    return max(population, key=fitness)
-
 # Validate the Sudoku grid
 def is_valid_solution(grid):
     for i in range(9):
@@ -142,6 +104,29 @@ def is_valid_solution(grid):
             if len(set(subgrid)) != 9:
                 return False
     return True
+
+# Genetic Algorithm
+def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_rate=0.25, elite_fraction=0.25, selection_type="roulette"):
+    population = generate_population(puzzle, population_size)
+    
+    for generation in range(generations):
+        fitness_scores = [fitness(ind) for ind in population]
+
+        # Check for a perfect solution
+        if max(fitness_scores) == 243:
+            return population[fitness_scores.index(max(fitness_scores))], generation
+
+        # Elite selection and crossover logic (unchanged)
+        elite_count = int(elite_fraction * population_size)
+        elites = [population[i] for i in np.argsort(fitness_scores)[-elite_count:]]
+        parents = [roulette_selection(population, fitness_scores) for _ in range(population_size - elite_count)]
+        new_population = elites + [
+            mutate(crossover(random.choice(parents), random.choice(parents)), mutation_rate)
+            for _ in range(population_size - elite_count)
+        ]
+        population = new_population
+
+    return max(population, key=fitness), generations  # Return best candidate if no perfect solution
 
 # Run the solver
 print("Generating Sudoku puzzle...")
