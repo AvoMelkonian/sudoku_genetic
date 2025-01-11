@@ -13,10 +13,13 @@ if __name__ == '__main__':
 
 from flask import Flask, request, jsonify
 import numpy as np
-from sudoku_generator import generate_sudoku
-from ga_sudoku import genetic_algorithm, backtrack
+from ga_sudoku import genetic_algorithm, backtrack, is_valid_solution
+from sudoku_generator import generate_sudoku  # Assume this module generates puzzles
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/solve', methods=['POST'])
 def solve():
@@ -30,7 +33,7 @@ def solve():
         elite_fraction = data.get('eliteFraction', 0.25)
         selection_type = data.get('selectionType', 'roulette')
 
-        # Generate or receive the puzzle
+        # Generate or use provided puzzle
         puzzle = np.array(data.get('puzzle')) if data.get('puzzle') else generate_sudoku(difficulty)
 
         # Solve the puzzle
@@ -43,7 +46,7 @@ def solve():
             selection_type=selection_type
         )
 
-        # Refine with backtracking if the solution isn't valid
+        # Validate solution and refine with backtracking if necessary
         if not is_valid_solution(solved_puzzle):
             backtrack(solved_puzzle)
 
@@ -59,19 +62,5 @@ def solve():
         return jsonify({"error": str(e)}), 500
 
 
-def is_valid_solution(grid):
-    """Validate the Sudoku grid."""
-    for i in range(9):
-        if len(set(grid[i])) != 9 or len(set(grid[:, i])) != 9:
-            return False
-    for row in range(0, 9, 3):
-        for col in range(0, 9, 3):
-            subgrid = grid[row:row+3, col:col+3].flatten()
-            if len(set(subgrid)) != 9:
-                return False
-    return True
-
-
 if __name__ == '__main__':
     app.run(debug=True)
-

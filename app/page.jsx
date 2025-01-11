@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Inputs from "../Components/Inputs";
 import SudokuGrid from "../Components/SudokuGrid";
 import { CircularProgress } from "@mui/material";
-import FitnessChart from "../Components/FitnessChart";
 
 function App() {
   const [config, setConfig] = useState({
@@ -18,13 +17,16 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [puzzle, setPuzzle] = useState(null);
   const [solvedPuzzle, setSolvedPuzzle] = useState(null);
-  const [fitnessData, setFitnessData] = useState([]);
+  const [generationFound, setGenerationFound] = useState(null);
+  const [bestCandidate, setBestCandidate] = useState(null);
 
   const handleSolve = async () => {
     setLoading(true);
     setPuzzle(null);
     setSolvedPuzzle(null);
-  
+    setGenerationFound(null);
+    setBestCandidate(null);
+
     try {
       const response = await fetch("http://127.0.0.1:5000/solve", {
         method: "POST",
@@ -38,19 +40,18 @@ function App() {
           selectionType: config.selectionType,
         }),
       });
-  
+
       const data = await response.json();
-      setPuzzle(data.originalPuzzle);
-      setSolvedPuzzle(data.solvedPuzzle);
-      alert(`Solution found in generation: ${data.generationFound}`);
+      setPuzzle(data.originalPuzzle); // The original puzzle received from the server
+      setSolvedPuzzle(data.solvedPuzzle); // The solved puzzle received from the server
+      setGenerationFound(data.generationFound); // Display generation where solution was found
+      setBestCandidate(data.bestCandidate); // Display best candidate if no solution
     } catch (error) {
       console.error("Error solving puzzle:", error);
     } finally {
       setLoading(false);
     }
   };
-  
-  
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
@@ -71,13 +72,12 @@ function App() {
         style={{
           display: "flex",
           justifyContent: "space-evenly",
-          alignItems: "center",
+          alignItems: "flex-start",
+          gap: "40px",
         }}
       >
         {/* Generated Puzzle */}
-        {puzzle && (
-          <SudokuGrid grid={puzzle} title="Generated Puzzle" />
-        )}
+        {puzzle && <SudokuGrid grid={puzzle} title="Generated Puzzle" />}
 
         {/* Loader */}
         {loading && (
@@ -88,84 +88,30 @@ function App() {
         )}
 
         {/* Solved Puzzle */}
-        {solvedPuzzle && (
-          <SudokuGrid grid={solvedPuzzle} title="Solved Puzzle" />
-        )}
-        <FitnessChart fitnessData={fitnessData} />
+        {solvedPuzzle && <SudokuGrid grid={solvedPuzzle} title="Solved Puzzle" />}
       </div>
+
+      {/* Results Section */}
+      <div style={{ marginTop: "20px", textAlign: "left" }}>
+      {generationFound !== null ? (
+        <p>
+          <strong>Solution found in generation:</strong> {generationFound}
+        </p>
+      ) : (
+        bestCandidate && (
+          <div>
+            <p>
+              <strong>No solution found. Best candidate:</strong>
+            </p>
+            <pre style={{ background: "#f4f4f4", padding: "10px", borderRadius: "5px" }}>
+              {JSON.stringify(bestCandidate, null, 2)}
+            </pre>
+          </div>
+        )
+      )}
+    </div>
     </div>
   );
 }
 
-// Mock Functions (Replace with API Calls)
-const generatePuzzle = async (difficulty) => {
-  await delay(1000); // Simulate delay
-  return Array(9)
-    .fill(0)
-    .map(() => Array(9).fill(0)); // Replace with logic
-};
-
-const solvePuzzleWithFitnessUpdates = async (puzzle, config, updateFitness) => {
-  const fitness = [];
-  for (let gen = 0; gen < config.generations; gen++) {
-    const randomFitness = Math.random() * 100; // Mock fitness values
-    fitness.push(randomFitness);
-
-    // Update the chart with the new fitness data
-    updateFitness([...fitness]);
-
-    // Check for a stopping condition (e.g., fitness > 95)
-    if (randomFitness > 95) {
-      console.log(`Stopping early at generation ${gen + 1} with fitness ${randomFitness}`);
-      break;
-    }
-
-    await delay(100); // Simulate generation delay
-  }
-  return puzzle.map((row) =>
-    row.map(() => Math.floor(Math.random() * 9) + 1)
-  ); // Replace with logic
-};
-
-
-const solvePuzzle = async (puzzle, config) => {
-  await delay(2000); // Simulate delay
-  return puzzle.map((row) =>
-    row.map(() => Math.floor(Math.random() * 9) + 1)
-  ); // Replace with logic
-};
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export default App;
-
-
-/*import React, { useEffect, useState } from 'react';
-
-const APIPage = () => {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    fetch('http://127.0.0.1:5000/api/data') // Ensure this URL is correct
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then((data) => setData(data))
-      .catch((error) => console.error('Error fetching data:', error));
-  }, []);
-  
-
-  return (
-    <div>
-      <h1>Data from Flask</h1>
-      {data ? <p>{data.message}</p> : <p>Loading...</p>}
-      <SudokuSolverUI></SudokuSolverUI>
-      <SudokuGrid></SudokuGrid>
-    </div>
-  );
-};
-
-export default APIPage;*/
