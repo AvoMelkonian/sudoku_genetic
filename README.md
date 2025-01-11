@@ -34,7 +34,7 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
    pip install -r requirements.txt
    pip install numpy
    pip install flask-cors
-   npm install next@latest react@latest react-dom@latest
+   npm install
    ```
 
 4. Run Back-end:
