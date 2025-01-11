@@ -1,19 +1,5 @@
-import sudoku_generator as sg
 import numpy as np
 import random
-
-# Define the puzzle (0 represents empty cells)
-puzzle = np.array([
-    [5, 3, 0, 0, 7, 0, 0, 0, 0],
-    [6, 0, 0, 1, 9, 5, 0, 0, 0],
-    [0, 9, 8, 0, 0, 0, 0, 6, 0],
-    [8, 0, 0, 0, 6, 0, 0, 0, 3],
-    [4, 0, 0, 8, 0, 3, 0, 0, 1],
-    [7, 0, 0, 0, 2, 0, 0, 0, 6],
-    [0, 6, 0, 0, 0, 0, 2, 8, 0],
-    [0, 0, 0, 4, 1, 9, 0, 0, 5],
-    [0, 0, 0, 0, 8, 0, 0, 7, 9]
-])
 
 # Fitness Function: Higher scores for more unique rows, columns, and subgrids
 def fitness(individual):
@@ -55,12 +41,58 @@ def crossover(parent1, parent2):
 def mutate(individual, mutation_rate=0.1):
     for row in range(9):
         if random.random() < mutation_rate:
-            mutable_indices = [i for i in range(9) if puzzle[row, i] == 0]
+            mutable_indices = [i for i in range(9) if individual[row, i] == 0]
             if len(mutable_indices) > 1:
                 idx1, idx2 = random.sample(mutable_indices, 2)
                 individual[row, idx1], individual[row, idx2] = individual[row, idx2], individual[row, idx1]
     return individual
 
+def roulette_selection(population, fitness_scores):
+    total_fitness = sum(fitness_scores)
+    selection_probs = [f / total_fitness for f in fitness_scores]
+    selected_index = np.random.choice(len(population), p=selection_probs)
+    return population[selected_index]
+
+def tournament_selection(population, fitness_scores, k=5):
+    tournament_indices = random.sample(range(len(population)), k)
+    tournament_individuals = [population[i] for i in tournament_indices]
+    tournament_fitness = [fitness_scores[i] for i in tournament_indices]
+    winner_index = tournament_fitness.index(max(tournament_fitness))
+    return tournament_individuals[winner_index]
+
+# Genetic Algorithm
+def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_rate=0.25, elite_fraction=0.25, selection_type="roulette"):
+    population = generate_population(puzzle, population_size)
+
+    for generation in range(generations):
+        fitness_scores = [fitness(ind) for ind in population]
+
+        # Check for a perfect solution
+        if max(fitness_scores) == 243:
+            return population[fitness_scores.index(max(fitness_scores))], generation
+
+        # Elite selection
+        elite_count = int(elite_fraction * population_size)
+        elites = [population[i] for i in np.argsort(fitness_scores)[-elite_count:]]
+
+        # Parent selection
+        if selection_type == "roulette":
+            parents = [roulette_selection(population, fitness_scores) for _ in range(population_size - elite_count)]
+        elif selection_type == "tournament":
+            parents = [tournament_selection(population, fitness_scores, k=5) for _ in range(population_size - elite_count)]
+        else:
+            raise ValueError("Invalid selection type. Choose 'roulette' or 'tournament'.")
+
+        # Generate new population with crossover and mutation
+        new_population = elites + [
+            mutate(crossover(random.choice(parents), random.choice(parents)), mutation_rate)
+            for _ in range(population_size - elite_count)
+        ]
+        population = new_population
+
+    return max(population, key=fitness), generations  # Return best candidate if no perfect solution
+
+# Backtracking Refinement
 def backtrack(grid):
     def is_valid(grid, row, col, num):
         if num in grid[row] or num in grid[:, col]:
@@ -80,19 +112,6 @@ def backtrack(grid):
                 return False
     return True
 
-def roulette_selection(population, fitness_scores):
-    total_fitness = sum(fitness_scores)
-    selection_probs = [f / total_fitness for f in fitness_scores]
-    selected_index = np.random.choice(len(population), p=selection_probs)
-    return population[selected_index]
-
-def tournament_selection(population, fitness_scores, k=5):
-    tournament_indices = random.sample(range(len(population)), k)
-    tournament_individuals = [population[i] for i in tournament_indices]
-    tournament_fitness = [fitness_scores[i] for i in tournament_indices]
-    winner_index = tournament_fitness.index(max(tournament_fitness))
-    return tournament_individuals[winner_index]
-
 # Validate the Sudoku grid
 def is_valid_solution(grid):
     for i in range(9):
@@ -104,47 +123,3 @@ def is_valid_solution(grid):
             if len(set(subgrid)) != 9:
                 return False
     return True
-
-# Genetic Algorithm
-def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_rate=0.25, elite_fraction=0.25, selection_type="roulette"):
-    population = generate_population(puzzle, population_size)
-    
-    for generation in range(generations):
-        fitness_scores = [fitness(ind) for ind in population]
-
-        # Check for a perfect solution
-        if max(fitness_scores) == 243:
-            return population[fitness_scores.index(max(fitness_scores))], generation
-
-        # Elite selection and crossover logic (unchanged)
-        elite_count = int(elite_fraction * population_size)
-        elites = [population[i] for i in np.argsort(fitness_scores)[-elite_count:]]
-        parents = [roulette_selection(population, fitness_scores) for _ in range(population_size - elite_count)]
-        new_population = elites + [
-            mutate(crossover(random.choice(parents), random.choice(parents)), mutation_rate)
-            for _ in range(population_size - elite_count)
-        ]
-        population = new_population
-
-    return max(population, key=fitness), generations  # Return best candidate if no perfect solution
-
-# Run the solver
-print("Generating Sudoku puzzle...")
-puzzle = sg.generate_sudoku(difficulty="easy")
-print("Puzzle Generated:")
-print(puzzle)
-print("Running genetic algorithm...")
-solution = genetic_algorithm(puzzle)
-
-print("Best candidate solution:")
-print(solution)
-
-if is_valid_solution(solution):
-    print("Valid solution found!")
-else:
-    print("Refining with backtracking...")
-    if backtrack(solution):
-        print("Final solution:")
-        print(solution)
-    else:
-        print("Backtracking failed.")
