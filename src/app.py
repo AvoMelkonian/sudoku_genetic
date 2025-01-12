@@ -13,6 +13,7 @@ def solve():
         data = request.json
         puzzle = np.array(data.get('puzzle')) if data.get('puzzle') else generate_sudoku(data.get('difficulty', 'easy'))
 
+        # Solve the puzzle using the genetic algorithm
         solved_puzzle, generation_found = genetic_algorithm(
             puzzle,
             generations=data.get('generations', 2000),
@@ -22,25 +23,29 @@ def solve():
             selection_type=data.get('selectionType', 'roulette')
         )
 
+        # Calculate fitness of the result
         fitness_value = fitness(solved_puzzle)
-        is_valid = fitness_value == 243
+        is_valid_solution = fitness_value == 243
 
-        if not is_valid:
+        # Refine with backtracking if needed
+        if not is_valid_solution:
             backtrack(solved_puzzle)
             fitness_value = fitness(solved_puzzle)
-            is_valid = fitness_value == 243
+            is_valid_solution = fitness_value == 243
 
+        # Prepare the response
         response = {
             "originalPuzzle": puzzle.tolist(),
-            "solvedPuzzle": solved_puzzle.tolist() if is_valid else None,
-            "bestCandidate": solved_puzzle.tolist() if not is_valid else None,
+            "solvedPuzzle": solved_puzzle.tolist() if is_valid_solution else None,
+            "bestCandidate": solved_puzzle.tolist() if not is_valid_solution else None,
             "generationFound": generation_found,
-            "fitness": fitness_value,
+            "isValidSolution": is_valid_solution
         }
         return jsonify(response), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print("Error:", e)
+        return jsonify({"error": "Internal server error"}), 500
 
 
 if __name__ == '__main__':
