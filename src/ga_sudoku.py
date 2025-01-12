@@ -107,3 +107,25 @@ def backtrack(grid):
                         grid[row, col] = 0
                 return False
     return True
+
+"""
+Console Debug:
+print("Generating Sudoku puzzle...")
+puzzle = sg.generate_sudoku(difficulty="easy")
+print("Puzzle Generated:")
+print(puzzle)
+print("Running genetic algorithm...")
+solution = genetic_algorithm(puzzle)
+
+print("Best candidate solution:")
+print(solution)
+
+if is_valid_solution(solution):
+    print("Valid solution found!")
+else:
+    print("Refining with backtracking...")
+    if backtrack(solution):
+        print("Final solution:")
+        print(solution)
+    else:
+        print("Backtracking failed.") """
