@@ -19,6 +19,7 @@ function App() {
   const [solvedPuzzle, setSolvedPuzzle] = useState(null);
   const [generationFound, setGenerationFound] = useState(null);
   const [bestCandidate, setBestCandidate] = useState(null);
+  const [bestFitness, setFitness] = useState(null);
 
   const handleSolve = async () => {
     setLoading(true);
@@ -26,6 +27,7 @@ function App() {
     setSolvedPuzzle(null);
     setGenerationFound(null);
     setBestCandidate(null);
+    setFitness(null);
 
     try {
       const response = await fetch("http://127.0.0.1:5000/solve", {
@@ -46,6 +48,7 @@ function App() {
       setSolvedPuzzle(data.solvedPuzzle); // The solved puzzle received from the server
       setGenerationFound(data.generationFound); // Display generation where solution was found
       setBestCandidate(data.bestCandidate); // Display best candidate if no solution
+      setFitness(data.bestFitness);
     } catch (error) {
       console.error("Error solving puzzle:", error);
     } finally {
@@ -86,30 +89,40 @@ function App() {
             <p>Solving...</p>
           </div>
         )}
-
-        {/* Solved Puzzle */}
-        {solvedPuzzle && <SudokuGrid grid={solvedPuzzle} title="Solved Puzzle" />}
       </div>
-
-      {/* Results Section */}
-      <div style={{ marginTop: "20px", textAlign: "left" }}>
-      {generationFound !== null ? (
-        <p>
-          <strong>Solution found in generation:</strong> {generationFound}
-        </p>
-      ) : (
-        bestCandidate && (
-          <div>
-            <p>
-              <strong>No solution found. Best candidate:</strong>
-            </p>
-            <pre style={{ background: "#f4f4f4", padding: "10px", borderRadius: "5px" }}>
-              {JSON.stringify(bestCandidate, null, 2)}
-            </pre>
-          </div>
-        )
-      )}
-    </div>
+        {/* Results Section */}
+        <div style={{
+          display: "flex",
+          justifyContent: "space-evenly",
+          alignItems: "flex-start",
+          gap: "40px",
+        }}>
+          {bestFitness === 243 ? (
+            <div style={{
+              display: "flex",
+              justifyContent: "space-evenly",
+              alignItems: "flex-start",
+              gap: "40px",
+            }}>
+              <p>
+                <strong>Solution found in generation:</strong> {generationFound}
+              </p>
+              <SudokuGrid grid={solvedPuzzle} title="Solved Puzzle" />
+            </div>
+          ) : (
+            <div style={{
+              display: "flex",
+              justifyContent: "space-evenly",
+              alignItems: "flex-start",
+              gap: "40px",
+            }}>
+              <p>
+                <strong>No solution found. Best candidate with fitness in {generationFound}:</strong>
+              </p>
+              <SudokuGrid grid={bestCandidate} title="Best Candidate" />
+            </div>
+          )}
+        </div>
     </div>
   );
 }

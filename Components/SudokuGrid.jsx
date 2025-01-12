@@ -2,6 +2,9 @@
 import React from "react";
 
 function SudokuGrid({ grid, title }) {
+  if (!grid) {
+    return <p>{title}: No grid to display</p>;
+  }
   return (
     <div>
       <h3>{title}</h3>

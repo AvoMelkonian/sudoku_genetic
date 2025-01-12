@@ -1,3 +1,4 @@
+import sudoku_generator as sg
 import numpy as np
 import random
 
@@ -41,11 +42,30 @@ def crossover(parent1, parent2):
 def mutate(individual, mutation_rate=0.1):
     for row in range(9):
         if random.random() < mutation_rate:
-            mutable_indices = [i for i in range(9) if individual[row, i] == 0]
+            mutable_indices = [i for i in range(9) if puzzle[row, i] == 0]
             if len(mutable_indices) > 1:
                 idx1, idx2 = random.sample(mutable_indices, 2)
                 individual[row, idx1], individual[row, idx2] = individual[row, idx2], individual[row, idx1]
     return individual
+
+def backtrack(grid):
+    def is_valid(grid, row, col, num):
+        if num in grid[row] or num in grid[:, col]:
+            return False
+        subgrid = grid[row//3*3:row//3*3+3, col//3*3:col//3*3+3]
+        return num not in subgrid.flatten()
+
+    for row in range(9):
+        for col in range(9):
+            if grid[row, col] == 0:
+                for num in range(1, 10):
+                    if is_valid(grid, row, col, num):
+                        grid[row, col] = num
+                        if backtrack(grid):
+                            return True
+                        grid[row, col] = 0
+                return False
+    return True
 
 def roulette_selection(population, fitness_scores):
     total_fitness = sum(fitness_scores)
@@ -61,15 +81,16 @@ def tournament_selection(population, fitness_scores, k=5):
     return tournament_individuals[winner_index]
 
 # Genetic Algorithm
-def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_rate=0.25, elite_fraction=0.25, selection_type="roulette"):
+def genetic_algorithm(puzzle, generations=1500, population_size=170, mutation_rate=0.3, elite_fraction=0.3, selection_type="tournament"):
     population = generate_population(puzzle, population_size)
-
+    
     for generation in range(generations):
         fitness_scores = [fitness(ind) for ind in population]
 
         # Check for a perfect solution
         if max(fitness_scores) == 243:
-            return population[fitness_scores.index(max(fitness_scores))], generation
+            print(f"Solution found in generation {generation}")
+            return population[fitness_scores.index(max(fitness_scores))]
 
         # Elite selection
         elite_count = int(elite_fraction * population_size)
@@ -90,27 +111,12 @@ def genetic_algorithm(puzzle, generations=2000, population_size=170, mutation_ra
         ]
         population = new_population
 
-    return max(population, key=fitness), generations  # Return best candidate if no perfect solution
+        # Print progress
+        if generation % 100 == 0:
+            print(f"Generation {generation}: Best fitness = {max(fitness_scores)}")
 
-# Backtracking Refinement
-def backtrack(grid):
-    def is_valid(grid, row, col, num):
-        if num in grid[row] or num in grid[:, col]:
-            return False
-        subgrid = grid[row//3*3:row//3*3+3, col//3*3:col//3*3+3]
-        return num not in subgrid.flatten()
-
-    for row in range(9):
-        for col in range(9):
-            if grid[row, col] == 0:
-                for num in range(1, 10):
-                    if is_valid(grid, row, col, num):
-                        grid[row, col] = num
-                        if backtrack(grid):
-                            return True
-                        grid[row, col] = 0
-                return False
-    return True
+    print("No solution found.")
+    return max(population, key=fitness)
 
 # Validate the Sudoku grid
 def is_valid_solution(grid):
@@ -123,3 +129,24 @@ def is_valid_solution(grid):
             if len(set(subgrid)) != 9:
                 return False
     return True
+
+# Run the solver
+print("Generating Sudoku puzzle...")
+puzzle = sg.generate_sudoku(difficulty="easy")
+print("Puzzle Generated:")
+print(puzzle)
+print("Running genetic algorithm...")
+solution = genetic_algorithm(puzzle)
+
+print("Best candidate solution:")
+print(solution)
+
+if is_valid_solution(solution):
+    print("Valid solution found!")
+else:
+    print("Refining with backtracking...")
+    if backtrack(solution):
+        print("Final solution:")
+        print(solution)
+    else:
+        print("Backtracking failed.")
