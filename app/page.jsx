@@ -1,5 +1,4 @@
 'use client'
-// App.js
 import React, { useState } from "react";
 import Inputs from "../Components/Inputs";
 import SudokuGrid from "../Components/SudokuGrid";
@@ -18,16 +17,12 @@ function App() {
   const [puzzle, setPuzzle] = useState(null);
   const [solvedPuzzle, setSolvedPuzzle] = useState(null);
   const [generationFound, setGenerationFound] = useState(null);
-  const [bestCandidate, setBestCandidate] = useState(null);
-  const [bestFitness, setFitness] = useState(null);
 
   const handleSolve = async () => {
     setLoading(true);
     setPuzzle(null);
     setSolvedPuzzle(null);
     setGenerationFound(null);
-    setBestCandidate(null);
-    setFitness(null);
 
     try {
       const response = await fetch("http://127.0.0.1:5000/solve", {
@@ -44,11 +39,9 @@ function App() {
       });
 
       const data = await response.json();
-      setPuzzle(data.originalPuzzle); // The original puzzle received from the server
-      setSolvedPuzzle(data.solvedPuzzle); // The solved puzzle received from the server
-      setGenerationFound(data.generationFound); // Display generation where solution was found
-      setBestCandidate(data.bestCandidate); // Display best candidate if no solution
-      setFitness(data.bestFitness);
+      setPuzzle(data.originalPuzzle);
+      setSolvedPuzzle(data.solvedPuzzle);
+      setGenerationFound(data.generationFound);
     } catch (error) {
       console.error("Error solving puzzle:", error);
     } finally {
@@ -58,71 +51,23 @@ function App() {
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
-      {/* Controls */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
         <Inputs config={config} setConfig={setConfig} onSolve={handleSolve} />
       </div>
 
-      {/* Main Section */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-evenly",
-          alignItems: "flex-start",
-          gap: "40px",
-        }}
-      >
-        {/* Generated Puzzle */}
+      <div style={{ display: "flex", justifyContent: "space-evenly", alignItems: "center" }}>
         {puzzle && <SudokuGrid grid={puzzle} title="Generated Puzzle" />}
+        {loading && <CircularProgress />}
+        {solvedPuzzle && <SudokuGrid grid={solvedPuzzle} title="Solved Puzzle" />}
+      </div>
 
-        {/* Loader */}
-        {loading && (
-          <div>
-            <CircularProgress />
-            <p>Solving...</p>
-          </div>
+      <div style={{ marginTop: "20px", textAlign: "left" }}>
+        {generationFound !== null && (
+          <p>
+            <strong>Solution found in generation:</strong> {generationFound}
+          </p>
         )}
       </div>
-        {/* Results Section */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-evenly",
-          alignItems: "flex-start",
-          gap: "40px",
-        }}>
-          {bestFitness === 243 ? (
-            <div style={{
-              display: "flex",
-              justifyContent: "space-evenly",
-              alignItems: "flex-start",
-              gap: "40px",
-            }}>
-              <p>
-                <strong>Solution found in generation:</strong> {generationFound}
-              </p>
-              <SudokuGrid grid={solvedPuzzle} title="Solved Puzzle" />
-            </div>
-          ) : (
-            <div style={{
-              display: "flex",
-              justifyContent: "space-evenly",
-              alignItems: "flex-start",
-              gap: "40px",
-            }}>
-              <p>
-                <strong>No solution found. Best candidate with fitness in {generationFound}:</strong>
-              </p>
-              <SudokuGrid grid={bestCandidate} title="Best Candidate" />
-            </div>
-          )}
-        </div>
     </div>
   );
 }
