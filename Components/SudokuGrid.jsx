@@ -1,37 +1,45 @@
-// Components/SudokuGrid.js
 import React from "react";
+import { Box, Typography } from "@mui/material";
 
 function SudokuGrid({ grid, title }) {
   if (!grid) {
-    return <p>{title}: No grid to display</p>;
+    return <Typography variant="body1">{title}: No grid to display</Typography>;
   }
+
   return (
-    <div>
-      <h3>{title}</h3>
-      <div
-        style={{
+    <Box sx={{ textAlign: "center", marginBottom: 4 }}>
+      <Typography variant="h6" gutterBottom>
+        {title}
+      </Typography>
+      <Box
+        sx={{
           display: "grid",
           gridTemplateColumns: "repeat(9, 40px)",
-          gap: "2px",
+          gap: "4px",
+          justifyContent: "center",
         }}
       >
         {grid.flat().map((value, index) => (
-          <div
+          <Box
             key={index}
-            style={{
+            sx={{
               width: "40px",
               height: "40px",
               textAlign: "center",
               lineHeight: "40px",
               border: "1px solid #ddd",
-              backgroundColor: value === 0 ? "#f9f9f9" : "#e0e0e0",
+              backgroundColor: value === 0 ? "#f5f5f5" : "#e0e0e0",
+              fontWeight: value === 0 ? "normal" : "bold",
+              fontSize: "16px",
+              color: value === 0 ? "#aaa" : "#000",
+              borderRadius: "4px", // Rounded corners
             }}
           >
             {value || ""}
-          </div>
+          </Box>
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
