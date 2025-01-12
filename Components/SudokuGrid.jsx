@@ -29,6 +29,7 @@ function SudokuGrid({ grid, title }) {
               lineHeight: "40px",
               border: "1px solid #ddd",
               backgroundColor: value === 0 ? "#f5f5f5" : "#e0e0e0",
+              fontFamily: "monospace",
               fontWeight: value === 0 ? "normal" : "bold",
               fontSize: "16px",
               color: value === 0 ? "#aaa" : "#000",
