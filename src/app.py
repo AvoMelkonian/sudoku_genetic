@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import numpy as np
 from ga_sudoku import genetic_algorithm, backtrack, fitness
-from sudoku_generator import generate_sudoku
+from sudoku_generator import generate_sudoku  # Ensure this module generates puzzles
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -13,7 +13,6 @@ def solve():
         data = request.json
         puzzle = np.array(data.get('puzzle')) if data.get('puzzle') else generate_sudoku(data.get('difficulty', 'easy'))
 
-        # Solve the puzzle
         solved_puzzle, generation_found = genetic_algorithm(
             puzzle,
             generations=data.get('generations', 2000),
@@ -23,11 +22,9 @@ def solve():
             selection_type=data.get('selectionType', 'roulette')
         )
 
-        # Calculate fitness
         fitness_value = fitness(solved_puzzle)
         is_valid = fitness_value == 243
 
-        # Refine with backtracking or lightweight refinement
         if not is_valid:
             backtrack(solved_puzzle)
             fitness_value = fitness(solved_puzzle)
@@ -44,6 +41,7 @@ def solve():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
