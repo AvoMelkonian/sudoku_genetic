@@ -29,30 +29,31 @@ function App() {
     setIsValidSolution(false);
 
     try {
-      const response = await fetch("https://sudoku-genetic.vercel.app/api/solve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            difficulty: config.difficulty,
-            generations: config.generations,
-            populationSize: config.populationSize,
-            mutationRate: config.mutationRate,
-            eliteFraction: config.eliteFraction,
-            selectionType: config.selectionType,
-        }),
-      });
-    
+        const response = await fetch("https://sudoku-genetic.vercel.app/api/solve", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                difficulty: config.difficulty,
+                generations: config.generations,
+                populationSize: config.populationSize,
+                mutationRate: config.mutationRate,
+                eliteFraction: config.eliteFraction,
+                selectionType: config.selectionType,
+            }),
+            mode: "cors", // Explicitly set CORS mode
+            credentials: "same-origin", // Use "include" if cookies are involved
+        });
 
-      const data = await response.json();
-      setPuzzle(data.originalPuzzle);
-      setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate); // Use best candidate if no solution
-      setGenerationFound(data.generationFound);
-      setIsValidSolution(data.isValidSolution);
-      setIsSolved(true);
+        const data = await response.json(); // Ensure this is outside of the object literal
+        setPuzzle(data.originalPuzzle);
+        setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate); // Use best candidate if no solution
+        setGenerationFound(data.generationFound);
+        setIsValidSolution(data.isValidSolution);
+        setIsSolved(true);
     } catch (error) {
-      console.error("Error solving puzzle:", error);
+        console.error("Error solving puzzle:", error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
