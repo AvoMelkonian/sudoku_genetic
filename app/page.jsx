@@ -30,7 +30,7 @@ function App() {
 
     try {
       const response = await fetch("https://sudoku-genetic.vercel.app/api/solve", {
-        method: "POST", // Ensure this is 'POST'
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             difficulty: config.difficulty,
