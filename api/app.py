@@ -11,6 +11,7 @@ CORS(app)
 def solve():
     try:
         data = request.json
+        print("Request Data: ", data)
         puzzle = np.array(data.get('puzzle')) if data.get('puzzle') else generate_sudoku(data.get('difficulty', 'easy'))
 
         # Solve the puzzle using the genetic algorithm
