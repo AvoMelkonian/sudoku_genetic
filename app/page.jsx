@@ -30,7 +30,7 @@ function App() {
 
     try {
       const response = await fetch("https://sudoku-genetic.vercel.app/api/solve", {
-        method: "POST", // Ensure this is 'POST'
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
             difficulty: config.difficulty,
@@ -40,9 +40,10 @@ function App() {
             eliteFraction: config.eliteFraction,
             selectionType: config.selectionType,
         }),
-      });
+        mode: "cors", // Explicitly set CORS mode
+        credentials: "same-origin", // Use "include" if cookies are involved
+    });    
     
-
       const data = await response.json();
       setPuzzle(data.originalPuzzle);
       setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate); // Use best candidate if no solution
