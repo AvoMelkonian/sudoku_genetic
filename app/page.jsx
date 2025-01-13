@@ -29,25 +29,30 @@ function App() {
     setIsValidSolution(false);
 
     try {
-      const response = await fetch("/api/solve", { 
-          method: "POST", 
-          headers: { "Content-Type": "application/json" }, 
-          body: JSON.stringify(config) 
+      const response = await fetch("/api/solve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          difficulty: config.difficulty,
+          generations: config.generations,
+          populationSize: config.populationSize,
+          mutationRate: config.mutationRate,
+          eliteFraction: config.eliteFraction,
+          selectionType: config.selectionType,
+        }),
       });
-      if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-      }
+
       const data = await response.json();
       setPuzzle(data.originalPuzzle);
-      setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate);
+      setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate); // Use best candidate if no solution
       setGenerationFound(data.generationFound);
       setIsValidSolution(data.isValidSolution);
       setIsSolved(true);
-  } catch (error) {
+    } catch (error) {
       console.error("Error solving puzzle:", error);
-  } finally {
+    } finally {
       setLoading(false);
-  }  
+    }
   };
 
   return (
