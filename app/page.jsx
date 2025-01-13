@@ -29,18 +29,19 @@ function App() {
     setIsValidSolution(false);
 
     try {
-      const response = await fetch("/api/solve", {
+      const response = await fetch("https://sudoku-genetic.vercel.app/api/solve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          difficulty: config.difficulty,
-          generations: config.generations,
-          populationSize: config.populationSize,
-          mutationRate: config.mutationRate,
-          eliteFraction: config.eliteFraction,
-          selectionType: config.selectionType,
+            difficulty: config.difficulty,
+            generations: config.generations,
+            populationSize: config.populationSize,
+            mutationRate: config.mutationRate,
+            eliteFraction: config.eliteFraction,
+            selectionType: config.selectionType,
         }),
       });
+    
 
       const data = await response.json();
       setPuzzle(data.originalPuzzle);

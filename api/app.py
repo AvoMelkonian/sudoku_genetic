@@ -5,12 +5,13 @@ from sudoku_generator import generate_sudoku  # Ensure this module generates puz
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/solve', methods=['POST'])
 def solve():
     try:
         data = request.json
+        print("Request Data: ", data)
         puzzle = np.array(data.get('puzzle')) if data.get('puzzle') else generate_sudoku(data.get('difficulty', 'easy'))
 
         # Solve the puzzle using the genetic algorithm
