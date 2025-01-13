@@ -47,6 +47,7 @@ def solve():
         print("Error:", e)
         return jsonify({"error": "Internal server error"}), 500
 
+handler = app
 
 if __name__ == '__main__':
     app.run(debug=True)
