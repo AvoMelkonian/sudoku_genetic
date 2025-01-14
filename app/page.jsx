@@ -42,6 +42,7 @@ function App() {
         }),
         mode: "cors", // Explicitly set CORS mode
         credentials: "same-origin", // Use "include" if cookies are involved
+      });
       const data = await response.json();
       setPuzzle(data.originalPuzzle);
       setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate); // Use best candidate if no solution
