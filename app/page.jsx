@@ -50,9 +50,9 @@ function App() {
       setIsValidSolution(data.isValidSolution);
       setIsSolved(true);
     } catch (error) {
-      console.error("Error solving puzzle:", error);
+        console.error("Error solving puzzle:", error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
