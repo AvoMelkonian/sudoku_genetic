@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/api/solve", "destination": "/api/app.py" }
-  ]
+  ],
+  "functions": {
+    "api/*.py": {
+      "runtime": "vercel-python@3.9"
+    }
+  }
 }
