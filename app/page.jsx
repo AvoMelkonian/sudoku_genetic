@@ -29,8 +29,8 @@ function App() {
     setIsValidSolution(false);
 
     try {
-      const response = await fetch("https://sudoku-genetic.vercel.app/api/solve", {
-        method: "GET",
+      const response = await fetch("/api/solve", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           difficulty: config.difficulty,
