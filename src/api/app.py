@@ -1,17 +1,22 @@
+import sys
+import os
+
+# Add the parent directory of 'api' to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flask import Flask, request, jsonify
 import numpy as np
 from ga_sudoku import genetic_algorithm, backtrack, fitness
-from sudoku_generator import generate_sudoku  # Ensure this module generates puzzles
+from sudoku_generator import generate_sudoku
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://sudoku-genetic.vercel.app"}})
+CORS(app)
 
 @app.route('/solve', methods=['POST'])
 def solve():
     try:
         data = request.json
-        print("Request Data: ", data)
         puzzle = np.array(data.get('puzzle')) if data.get('puzzle') else generate_sudoku(data.get('difficulty', 'easy'))
 
         # Solve the puzzle using the genetic algorithm
@@ -48,7 +53,6 @@ def solve():
         print("Error:", e)
         return jsonify({"error": "Internal server error"}), 500
 
-handler = app
 
 if __name__ == '__main__':
     app.run(debug=True)

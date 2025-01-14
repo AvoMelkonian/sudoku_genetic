@@ -1,11 +1,8 @@
 {
     "functions": {
-      "api/*.py": {
+      "src/api/*.py": {
         "maxDuration": 10
       }
-    },
-    "rewrites": [
-    { "source": "/api/solve", "destination": "/solve" }
-  ]
-}
+    }
+  }
   
