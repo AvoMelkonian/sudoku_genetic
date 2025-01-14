@@ -40,8 +40,9 @@ function App() {
           eliteFraction: config.eliteFraction,
           selectionType: config.selectionType,
         }),
+        mode: "cors", // Explicitly set CORS mode
+        credentials: "same-origin", // Use "include" if cookies are involved
       });
-
       const data = await response.json();
       setPuzzle(data.originalPuzzle);
       setSolvedPuzzle(data.solvedPuzzle || data.bestCandidate); // Use best candidate if no solution
@@ -49,9 +50,9 @@ function App() {
       setIsValidSolution(data.isValidSolution);
       setIsSolved(true);
     } catch (error) {
-      console.error("Error solving puzzle:", error);
+        console.error("Error solving puzzle:", error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
