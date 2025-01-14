@@ -1,8 +1,7 @@
 {
-    "functions": {
-      "src/api/*.py": {
-        "maxDuration": 10
-      }
+  "functions": {
+    "api/*.py": {
+      "maxDuration": 10
     }
   }
-  
+}
