@@ -29,7 +29,7 @@ function App() {
     setIsValidSolution(false);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/solve", {
+      const response = await fetch("https://sudoku-genetic.vercel.app/api/app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -40,8 +40,7 @@ function App() {
           eliteFraction: config.eliteFraction,
           selectionType: config.selectionType,
         }),
-        mode: "cors", // Explicitly set CORS mode
-        credentials: "same-origin", // Use "include" if cookies are involved
+        mode: "cors",
       });
       const data = await response.json();
       setPuzzle(data.originalPuzzle);
