@@ -11,7 +11,9 @@ from sudoku_generator import generate_sudoku
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": [
+    "https://sudoku-genetic-9orw6dl5y-avos-projects.vercel.app",
+    "https://sudoku-genetic.vercel.app"]}})
 
 @app.route('/solve', methods=['POST'])
 def solve():
