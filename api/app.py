@@ -13,7 +13,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": ["https://sudoku-genetic.vercel.app"]}})
 
-@app.route('/solve', methods=['POST'])
+@app.route('/solve', methods=['GET'])
 def solve():
     try:
         data = request.json
