@@ -38,7 +38,7 @@ This project implements a **Genetic Algorithm (GA)** to solve Sudoku puzzles. It
 4. Run Back-end:
 
    ```bash
-   py .\src\app.py
+   py .\src\api\app.py
    npm run dev
    ```
 
